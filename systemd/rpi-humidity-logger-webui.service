@@ -1,0 +1,10 @@
+[Unit]
+Description=RPi Humidity Logger WebUI
+After=network.target
+
+[Service]
+ExecStart=/opt/rpi-humidity-logger/app/logger webui
+WorkingDirectory=/opt/rpi-humidity-logger/app
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,206 @@
+#!/usr/bin/env python
+'''
+RPi Humidity Logger main script.
+
+The MIT License (MIT)
+
+Copyright (c) 2016 Dominique Barton
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+'''
+import os
+import sqlite3
+import json
+import Adafruit_DHT
+from time import sleep
+from flask import Flask, render_template
+
+
+class RPiHumidityLogger(object):
+    '''
+    RPi Humidity Logger main class which can be used to initialize and record
+    new sensor data.
+    '''
+    database_file = os.path.join(os.path.dirname(__file__), 'db.sqlite3')
+
+    def __init__(self, sensor_type, gpio_pins, collector_interval=60):
+        '''
+        Class constructor.
+        '''
+        self.sensor_type        = sensor_type.upper()
+        self.gpio_pins          = gpio_pins
+        self.collector_interval = collector_interval
+
+    @property
+    def connection(self):
+        '''
+        Returns the SQLite 3 connection.
+        '''
+        if not hasattr(self, '_connection'):
+            self._connection = sqlite3.connect(self.database_file)
+
+        return self._connection
+
+    def init(self):
+        '''
+        Initializes a new SQLite database file.
+        '''
+        # Rename old database file if it exists.
+        if os.path.isfile(self.database_file):
+            os.rename(self.database_file, self.database_file + '~old')
+
+        # Build column list.
+        columns = []
+        for i in range(len(self.gpio_pins)):
+            columns.append('temperature{} REAL'.format(i + 1))
+            columns.append('humidity{} REAL'.format(i + 1))
+
+        # Get SQLite connection.
+        c = self.connection
+
+        # Create table.
+        c.execute('''
+            CREATE TABLE log (id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date DATETIME default CURRENT_TIMESTAMP,
+            {}
+        )'''.format(', '.join(columns)))
+        c.commit()
+
+    def record(self):
+        '''
+        Records new sensor data to the SQLite database file.
+        '''
+        # Get SQLite connection.
+        c = self.connection
+
+        # Initialize required variables.
+        data = {}
+        i    = 1
+
+        # Get sensor.
+        sensor = getattr(Adafruit_DHT, self.sensor_type)
+
+        # Loop through all GPIO pins and read data.
+        for pin in self.gpio_pins:
+            humidity, temperature           = Adafruit_DHT.read_retry(sensor, pin)
+            data['temperature{}'.format(i)] = unicode(temperature)
+            data['humidity{}'.format(i)]    = unicode(humidity)
+            i                               += 1
+
+        # Insert data into table.
+        cols = ','.join(data.keys())
+        vals = ','.join(data.values())
+        c.execute('INSERT INTO log ({}) VALUES({})'.format(cols, vals))
+        c.commit()
+
+    def collector(self):
+        '''
+        Starts the collector.
+        '''
+        print('Starting collector...')
+        try:
+            while True:
+                print('Recording new sensor values...')
+                self.record()
+                sleep(self.collector_interval)
+        except KeyboardInterrupt:
+            print('Stopping collector...')
+
+    def webui(self):
+        '''
+        Stars the Flask-based WebUI.
+        '''
+        webui = Flask('RPiHumidityLogger')
+
+        @webui.route('/')
+        def index():
+            # Get sensor (amount).
+            sensors = len(self.gpio_pins)
+
+            # Setup SQLite row factory.
+            def dict_factory(cursor, row):
+                d = {}
+                for idx, col in enumerate(cursor.description):
+                    d[col[0]] = row[idx]
+                return d
+            self.connection.row_factory = dict_factory
+
+            # Get SQLite connection cursor.
+            c = self.connection.cursor()
+
+            # Get records from database.
+            c.execute('SELECT * FROM log')
+            records = c.fetchall()
+
+            # Get most recent records.
+            recent = records[-1]
+
+            # Calculate average temperature and humidty from recent records.
+            temperature = 0.0
+            humidity    = 0.0
+            for i in range(sensors):
+                temperature += recent['temperature{}'.format(i + 1)]
+                humidity    += recent['humidity{}'.format(i + 1)]
+            temperature = round(temperature / sensors, 1)
+            humidity = round(humidity / sensors, 1)
+
+            # Generate JSON-based data provider with all records.
+            data_provider = json.dumps(records)
+
+            # Render template.
+            return render_template(
+                'index.html',
+                temperature=temperature,
+                humidity=humidity,
+                sensors=len(self.gpio_pins),
+                data_provider=data_provider
+            )
+
+        # Run web server.
+        webui.run(host='0.0.0.0', port=80)
+
+    @property
+    def list(self):
+        '''
+        Returns a list with all log records.
+        '''
+        # Get SQLite connection.
+        c = self.connection.cursor()
+
+        # Select all entries.
+        c.execute('SELECT * FROM log')
+        return c.fetchall()
+
+if __name__ == '__main__':
+
+    # Parse CLI arguments.
+    import argparse
+    parser = argparse.ArgumentParser(description='RPi Humidity Logger.')
+    parser.add_argument('action', choices=('init', 'collector', 'webui', 'record', 'list'), help='Action')
+    args = parser.parse_args()
+
+    # Initialize new RPiHumidityLogger instance.
+    from config import SENSOR_TYPE, GPIO_PINS, INTERVAL
+    logger = RPiHumidityLogger(SENSOR_TYPE, GPIO_PINS, INTERVAL)
+
+    # Execute action.
+    if args.action == 'list':
+        print '\n'.join(map(lambda x: '|'.join((unicode(y) for y in x)), logger.list))
+    else:
+        getattr(logger, args.action)()

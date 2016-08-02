@@ -1,0 +1,30 @@
+h2
+{
+    color      : #909090;
+    font-weight: 100;
+}
+
+#temperature,
+#humidity
+{
+    text-align: center;
+    font-size : 4em;
+    margin-top: 20px;
+}
+
+#temperature
+{
+    color: #c06060;
+}
+
+#humidity
+{
+    color: #6080c0;
+}
+
+.chart
+{
+    width : 100%;
+    height: 500px;
+}
+

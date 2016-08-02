@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>RPi Humidity Logger</title>
+
+        <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/static/webui.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container-fluid">
+            <h2>Most recent values (avg)</h2>
+            <div class="row">
+                <div id="temperature" class="col-sm-6">
+                    <i class="glyphicon glyphicon-fire"></i>
+                    {{ temperature }} ºC
+                </div>
+                <div id="humidity" class="col-sm-6">
+                    <i class="glyphicon glyphicon-tint"></i>
+                    {{ humidity }} %
+                </div>
+            </div>
+
+            <div id="chart-container"></div>
+        </div>
+
+        <script>SENSORS = {{ sensors }}; DATA_PROVIDER = {{ data_provider|safe }};</script>
+        <script src="/static/jquery.min.js"></script>
+        <script src="/static/amcharts/amcharts.js"></script>
+        <script src="/static/amcharts/serial.js"></script>
+        <script src="/static/webui.js"></script>
+    </body>
+</html>
