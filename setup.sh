@@ -52,3 +52,23 @@ systemctl enable rpi-humidity-logger-collector
 systemctl enable rpi-humidity-logger-webui
 systemctl start rpi-humidity-logger-collector
 systemctl start rpi-humidity-logger-webui
+
+# Configure access point.
+read -p "Install and configure wireless access point (yes|no)? " AP
+if [ "${AP:0:1}" == "y" ]
+then
+    apt-get -y install dnsmasq hostapd
+    cat accesspoint/hosts >/etc/hosts
+    cat accesspoint/dhcpcd.conf >/etc/dhcpcd.conf
+    cat accesspoint/dnsmasq.conf >/etc/dnsmasq.conf
+    cat accesspoint/default/hostapd >/etc/default/hostapd
+    cat accesspoint/hostapd/hostapd.conf >/etc/hostapd/hostapd.conf
+    cat accesspoint/network/interfaces >/etc/network/interfaces
+    systemctl enable dnsmasq
+    systemctl enable hostapd
+    ifdown wlan0 && ifup wlan0
+    systemctl restart dnsmasq
+    systemctl restart hostapd
+    echo "NOTICE: System might change the IP address now..."
+    systemctl restart dhcpcd
+fi

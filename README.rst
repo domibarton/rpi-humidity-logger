@@ -42,6 +42,8 @@ Usage
 
 You should be able to connect to the Raspberry Pi via HTTP (port 80).
 
+If you've configured your RPi 3 as access point via setup script, then you should see the SSID "RPiHumidityLogger" with a default WPA passphrase "humidity".
+
 License
 =======
 
