@@ -22,6 +22,26 @@ First of all, make sure your Raspbian is up to date:
 
     sudo apt-get update && sudo apt-get -y upgrade
 
+Install RPi Humidity Logger
+---------------------------
+
+.. code-block:: bash
+
+    curl https://raw.githubusercontent.com/domibarton/rpi-humidity-logger/develop/setup.sh | bash
+
+Configuration
+=============
+
+Please have a look at the configuration file at `app/config.py`.
+
+By default the collector is configured for a DHT11 on GPIO PIN 2.
+It will poll the sensor in a 5 minute interval.
+
+Usage
+=====
+
+You should be able to connect to the Raspberry Pi via HTTP (port 80).
+
 License
 =======
 
