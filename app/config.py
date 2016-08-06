@@ -1,6 +1,6 @@
 # GPIO pins.
 GPIO_PINS = (
-    22,
+    2,
 )
 
 # Sensor type {DHT11, DHT22, AM2302}.
