@@ -40,7 +40,7 @@ function makeChart(number)
                 'lineThickness': 2,
                 'lineColor': '#c06060',
                 'bullet': 'round',
-                'bulletSize': 10,
+                'bulletSize': 6,
                 'balloonText': '[[value]] ºC',
                 'balloon': {
                     'drop': true,
@@ -58,7 +58,7 @@ function makeChart(number)
                 'lineColor': '#6080c0',
                 'fillAlphas': 0.25,
                 'bullet': 'round',
-                'bulletSize': 10,
+                'bulletSize': 6,
                 'balloonText': '[[value]] %',
                 'balloon': {
                     'drop': true,
