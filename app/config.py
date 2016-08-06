@@ -7,4 +7,4 @@ GPIO_PINS = (
 SENSOR_TYPE = 'DHT11'
 
 # Collector interval in seconds.
-INTERVAL = 300
+INTERVAL = 1800
