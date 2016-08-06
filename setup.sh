@@ -50,3 +50,5 @@ cp systemd/* /etc/systemd/system
 systemctl daemon-reload
 systemctl enable rpi-humidity-logger-collector
 systemctl enable rpi-humidity-logger-webui
+systemctl start rpi-humidity-logger-collector
+systemctl start rpi-humidity-logger-webui
