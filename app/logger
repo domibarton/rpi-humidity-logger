@@ -161,12 +161,10 @@ class RPiHumidityLogger(object):
             avg_humidity    = 0.0
             active_sensors  = 0
             for i in range(sensors):
-                t = recent['temperature{}'.format(i + 1)]
-                h = recent['humidity{}'.format(i + 1)]
-                if t and h:
-                    avg_temperature += t
-                    avg_humidity    += h
-                    active_sensors  += 1
+                avg_temperature += recent['temperature{}'.format(i + 1)]
+                avg_humidity    += recent['humidity{}'.format(i + 1)]
+                if t or h:
+                    active_sensors += 1
             avg_temperature = round(avg_temperature / active_sensors, 1)
             avg_humidity    = round(avg_humidity / active_sensors, 1)
 
