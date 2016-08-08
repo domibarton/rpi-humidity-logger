@@ -4,22 +4,55 @@ h2
     font-weight: 100;
 }
 
-#temperature,
-#humidity
+.average
 {
     text-align: center;
     font-size : 4em;
     margin-top: 20px;
 }
 
-#temperature
+.temperature
 {
     color: #c06060;
+    padding: 0 20px;
 }
 
-#humidity
+.humidity
 {
     color: #6080c0;
+}
+
+.temperature:before,
+.humidity:before
+{
+    position              : relative;
+    top                   : 1px;
+    display               : inline-block;
+    font-family           : 'Glyphicons Halflings';
+    font-style            : normal;
+    font-weight           : 400;
+    line-height           : 1;
+    -webkit-font-smoothing: antialiased;
+}
+
+.temperature:before
+{
+    content: '\e104';
+}
+
+.humidity:before
+{
+    content: '\e064';
+}
+
+.temperature:after
+{
+    content: ' ºC';
+}
+
+.humidity:after
+{
+    content: ' %';
 }
 
 .chart

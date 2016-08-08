@@ -1,7 +1,13 @@
 function makeChart(number)
 {
-    var id = 'chart' + number;
-    $('#chart-container').append('<h2>Sensor ' + number + '</h2><div id="' + id + '" class="chart">');
+    var id            = 'chart' + number;
+
+    var temperature   = '<span class="temperature">' + RECENT['temperature' + number] + '</span>';
+    var humidity      = '<span class="humidity">' + RECENT['humidity' + number] + '</span>';
+    var heading       = '<h2>Sensor ' + number + temperature + humidity + '</h2>';
+    var chart         = '<div id="' + id + '" class="chart"></div>';
+
+    $('#chart-container').append(heading + chart);
 
     AmCharts.makeChart(id, {
         'type': 'serial',
