@@ -99,8 +99,8 @@ class RPiHumidityLogger(object):
         # Loop through all GPIO pins and read data.
         for pin in self.gpio_pins:
             humidity, temperature           = Adafruit_DHT.read_retry(sensor, pin)
-            data['temperature{}'.format(i)] = unicode(temperature)
-            data['humidity{}'.format(i)]    = unicode(humidity)
+            data['temperature{}'.format(i)] = unicode(round(temperature, 1))
+            data['humidity{}'.format(i)]    = unicode(round(humidity, 1))
             i                               += 1
 
         # Insert data into table.
