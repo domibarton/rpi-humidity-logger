@@ -159,14 +159,16 @@ class RPiHumidityLogger(object):
             # Calculate average temperature and humidty from recent records.
             avg_temperature = 0.0
             avg_humidity    = 0.0
+            active_sensors  = 0
             for i in range(sensors):
                 t = recent['temperature{}'.format(i + 1)]
                 h = recent['humidity{}'.format(i + 1)]
                 if t and h:
                     avg_temperature += t
                     avg_humidity    += h
-            avg_temperature = round(avg_temperature / sensors, 1)
-            avg_humidity    = round(avg_humidity / sensors, 1)
+                    active_sensors  += 1
+            avg_temperature = round(avg_temperature / active_sensors, 1)
+            avg_humidity    = round(avg_humidity / active_sensors, 1)
 
             # Generate JSON-based data provider and recent record.
             data_provider = json.dumps(records)
